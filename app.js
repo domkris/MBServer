@@ -10,7 +10,7 @@ const socket = require('socket.io');
 const io = socket(server);
 
 const formatMessage = require('./utils/messages');
-const {userJoin, getCurrentUser, userLeave, gameUsers, getUserByName, updateUser} = require('./utils/users');
+const {userJoin, getCurrentUser, userLeave, gameUsers, getUserByName, updateGivingUser, updateReceivingUser} = require('./utils/users');
 
 io.on("connection", socket => {
 
@@ -25,10 +25,10 @@ io.on("connection", socket => {
         socket.join(user.game);
 
         // Welcome current user
-        socket.emit("welcomeMessage", formatMessage("BOT",`Welcome to the game ${username}`));
+        socket.emit("welcomeMessage", formatMessage("message", "BOT",`Welcome to the game ${username}`));
 
         // broadcast to the users a new connected user, (broeadcast to the everybodyexcept a user that is connecting)
-        socket.broadcast.to(user.game).emit("message", `${username} has joined the game`);
+        socket.broadcast.to(user.game).emit("gameMessage",formatMessage("userStatus", username, `Joined the game`, null));
 
          // broadcast to users all users in the same game
         io.to(user.game).emit("usersInGame", {users : gameUsers(user.game)});
@@ -44,10 +44,29 @@ io.on("connection", socket => {
         const userGivingMoney = getUserByName(message.username);
         const money = message.text;
         const userReceivingMoney = getUserByName(message.otherUser);
-        updateUser(userGivingMoney.username, money);
-        updateUser(userReceivingMoney.username, money);
+        updateGivingUser(userGivingMoney.username, money);
+        updateReceivingUser(userReceivingMoney.username, money);
+
         // emit to the other users in the same game
-        io.to(user.game).emit("gameMessage", formatMessage(message.username, message.text, message.otherUser));
+        io.to(user.game).emit("gameMessage", formatMessage("message", message.username, message.text, message.otherUser));
+
+    });
+
+    //listen for transaction and console to the server
+    socket.on("transaction", (message) => {
+        console.log(message);
+        const user = getCurrentUser(socket.id);
+        const userGivingMoney = getUserByName(message.username);
+        const money = message.amountArray;
+        const userReceivingMoney = getUserByName(message.otherUser);
+        console.log(userGivingMoney);
+        updateGivingUser(userGivingMoney.username, money);
+        updateReceivingUser(userReceivingMoney.username, money);
+
+        io.to(user.game).emit("transaction", formatMessage("transaction", message.username, money, message.otherUser));
+
+        // emit to the other users in the same game all users and their new amounts
+        io.to(user.game).emit("usersAfterTransaction", {users: gameUsers(user.game)});
     });
 
     
@@ -60,7 +79,8 @@ io.on("connection", socket => {
 
         if(user){
             // broadcast to the users in the game that a user has left the game
-            io.to(user.game).emit("message", `A ${user.username} has left the game`);
+            //io.to(user.game).emit("message", `A ${user.username} has left the game`);
+            io.to(user.game).emit("gameMessage", formatMessage("userStatus", user.username, `Left the game`, null));
 
             console.log(new Date().toLocaleTimeString() + '  user disconnected...', user.username);
  

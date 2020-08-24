@@ -16,12 +16,15 @@ function getCurrentUser(id){
     return users.find(user => user.id===id);
 }
 
-function updateUser(name, money){
-    users.forEach(element => {
-        console.log(element.index);
-    });
-    console.log(name + " " + money);
-    //users[index].amount += money;
+function updateGivingUser(name, money){
+    var index = users.map(user => user.username).indexOf(name);
+    users[index].amount = parseInt(users[index].amount) - parseInt(money);
+    console.log(users[index]);
+}
+function updateReceivingUser(name, money){
+    var index = users.map(user => user.username).indexOf(name);
+    users[index].amount = parseInt(users[index].amount) + parseInt(money);
+    console.log(users[index]);
 }
 
 function getUserByName(name){
@@ -44,5 +47,6 @@ module.exports = {
     userLeave,
     gameUsers,
     getUserByName,
-    updateUser
+    updateGivingUser,
+    updateReceivingUser
 };

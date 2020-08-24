@@ -1,19 +1,21 @@
 const moment = require('moment');
 
-function formatMessage(username, text, otherUser){
+function formatMessage(type, username, text, otherUser){
     if(username == "BOT"){
         return({
+            type,
             username : "MonopolBank Bot",
             text,
-            time: moment().subtract(0, 'days').calendar()
+            time: moment().format('h:mm')
         });
     }
     else 
     {
         return({
+            type,
             username,
             text,
-            time: moment().format('h:mm:ss a'),
+            time: moment().format('h:mm'),
             otherUser
         });
     }
