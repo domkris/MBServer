@@ -1,5 +1,5 @@
 const http = require('http');
-const PORT = process.env.port || 3002;// HEROKU specified port or localhost
+const PORT = process.env.port;// HEROKU specified port or localhost
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
