@@ -54,7 +54,6 @@ router.post('/', async (req, res) => {
                         newUser.save()
                             .then(user => {
                                 res.json({success: true, userData: user})
-                                console.log(user);
                             })
                             .catch(err => console.log(err));
                     }
@@ -110,7 +109,6 @@ router.post('/login', async (req, res) => {
          else {
              if(await bcrypt.compare(req.body.password, aUser[0].password)){
                  res.json({success: true, userData: aUser[0]});
-                 console.log("login success");
 
              }else {
                  res.json({message:"Wrong username or password !", success: false});

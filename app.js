@@ -1,5 +1,5 @@
 const http = require('http');
-const PORT = process.env.PORT;// HEROKU specified port or localhost
+const PORT = process.env.PORT || 3002;// HEROKU specified port or localhost
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -13,33 +13,50 @@ const io = socket(server);
 const formatMessage = require('./utils/messages');
 const {userJoin, getCurrentUser, userLeave, gameUsers, getUserByName, updateGivingUser, updateReceivingUser} = require('./utils/users');
 
-io.on("connection", socket => {
+io.on('connection', socket => {
 
     // show in server console user connected
+    console.log("------------------------USER-CONNECTED---------------------------");
     console.log(new Date().toLocaleTimeString() + "   user connected: ", socket.id);
 
     // Separate chat by GAMES
     socket.on("joinRoom", ({username, game, gameAmount}) => {
-
+        console.log("-------JOIN ROOM-----------------");
         const user = userJoin(socket.id, username, game, gameAmount);
-        console.log("GAME: " + user.game);
         socket.join(user.game);
-
+        
         // Welcome current user
         socket.emit("welcomeMessage", formatMessage("message", "BOT",`Welcome to the game ${username}`));
-
+        
         // broadcast to the users a new connected user, (broeadcast to the everybodyexcept a user that is connecting)
         socket.broadcast.to(user.game).emit("gameMessage",formatMessage("userStatus", username, `Joined the game`, null));
-
-         // broadcast to users all users in the same game
+        
+        // broadcast to users all users in the same game
         io.to(user.game).emit("usersInGame", {users : gameUsers(user.game)});
     })
+    
+    // show in server console user disconnected
+    socket.on("disconnect", () => {
+        console.log("disconect");
+        const user = userLeave(socket.id);
+        console.log("user " + user);
+        if(user){
+            // broadcast to the users in the game that a user has left the game
+            //io.to(user.game).emit("message", `A ${user.username} has left the game`);
+            io.to(user.game).emit("gameMessage", formatMessage("userStatus", user.username, `Left the game`, null));
 
-  
+            console.log(new Date().toLocaleTimeString() + '  user disconnected...', user.username);
+ 
+            // broadcast to users all users in the same game
+            io.to(user.game).emit("usersInGame", {users : gameUsers(user.game)});
+        }
+    });
+    
     //listen for gameMessage and console to the server
     socket.on("gameMessage", (message) => {
-        
+        console.log("------game-message------------------");
         console.log(message);
+        console.log("------game-message------------------");
         // find the current user
         const user = getCurrentUser(socket.id);
         const userGivingMoney = getUserByName(message.username);
@@ -70,25 +87,51 @@ io.on("connection", socket => {
         io.to(user.game).emit("usersAfterTransaction", {users: gameUsers(user.game)});
     });
 
-    
+     //listen for request to get money from the bank and console to the server
+    socket.on("fromBankTransaction", (message) => {
+        console.log(message);
+        const user = getCurrentUser(socket.id);
+        const money = message.amountArray;
+        const userReceivingMoney = getUserByName(message.username);
+        updateReceivingUser(userReceivingMoney.username, money);
+
+        io.to(user.game).emit("fromBankTransaction", formatMessage("fromBankTransaction", message.username, money));
+
+        // emit to the other users in the same game all users and their new amounts
+        io.to(user.game).emit("usersAfterTransaction", {users: gameUsers(user.game)});
+    });
 
 
-    // show in server console user disconnected
-    socket.on('disconnect', () => {
-
+    socket.on("userLeftGame", () => {
         const user = userLeave(socket.id);
+        console.log("user " + user);
 
         if(user){
             // broadcast to the users in the game that a user has left the game
-            //io.to(user.game).emit("message", `A ${user.username} has left the game`);
             io.to(user.game).emit("gameMessage", formatMessage("userStatus", user.username, `Left the game`, null));
-
-            console.log(new Date().toLocaleTimeString() + '  user disconnected...', user.username);
  
             // broadcast to users all users in the same game
             io.to(user.game).emit("usersInGame", {users : gameUsers(user.game)});
         }
     });
+
+    socket.on("userLogOut", () => {
+        const user = userLeave(socket.id);
+        console.log("user " + user);
+
+        if(user){
+
+            // broadcast to the users in the game that a user has left the game
+            io.to(user.game).emit("gameMessage", formatMessage("userStatus", user.username, `Left the game`, null));
+ 
+            // broadcast to users all users in the same game
+            io.to(user.game).emit("usersInGame", {users : gameUsers(user.game)});
+        }
+    });
+
+    
+
+
 
     socket.on('error', function (err) {
         console.log(err)
@@ -138,4 +181,6 @@ mongoose.connect(process.env.DB_CONN,
 });
 
 // listening to the server and port
-server.listen(PORT);
+server.listen(PORT, () => {
+    console.log(`app listening at http://localhost:${PORT}`)
+});

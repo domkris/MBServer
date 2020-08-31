@@ -21,7 +21,6 @@ router.get('/', async (req, res) => {
 router.get('/:gameName', async (req, res) => {
     try
     {
-        console.log(req.params);
         const foundGame = await Game.find({ name :req.params.gameName });
         if(foundGame.length !== 0){
             res.json({success : true, message:"Game exists"});
@@ -39,7 +38,6 @@ router.get('/:gameName', async (req, res) => {
 router.post('/joinGame', async (req, res) => {
     try
     {
-        console.log(req.params);
         const foundGame = await Game.find({ name : req.body.gameName });
         if(foundGame[0]){
             var password = foundGame[0].password;
@@ -85,7 +83,6 @@ router.post('/', async (req, res) => {
                         newGame.save()
                             .then(game => {
                                 res.json({success: true, gameData: game})
-                                console.log(game);
                             })
                             .catch(err => console.log(err));
                     }
