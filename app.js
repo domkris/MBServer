@@ -101,6 +101,20 @@ io.on('connection', socket => {
         io.to(user.game).emit("usersAfterTransaction", {users: gameUsers(user.game)});
     });
 
+       //listen for request to send money to the bank and console to the server
+       socket.on("toBankTransaction", (message) => {
+        console.log(message);
+        const user = getCurrentUser(socket.id);
+        const money = message.amountArray;
+        const userGivingMoney = getUserByName(message.username);
+        updateGivingUser(userGivingMoney.username, money);
+
+        io.to(user.game).emit("toBankTransaction", formatMessage("toBankTransaction", message.username, money));
+
+        // emit to the other users in the same game all users and their new amounts
+        io.to(user.game).emit("usersAfterTransaction", {users: gameUsers(user.game)});
+    });
+
 
     socket.on("userLeftGame", () => {
         const user = userLeave(socket.id);
