@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const GameSchema = mongoose.Schema({
     timeCreated: {
-        type: Date,
+        type: String,
         required: true,
         default: Date.now
     },

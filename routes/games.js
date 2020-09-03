@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const moment = require('moment');
 
 const Game = require('../models/Game');
 
@@ -66,7 +67,7 @@ router.post('/', async (req, res) => {
             res.json({message:"Choose another game name !", success: false});
         }else{
             const newGame = new Game({
-                timeCreated: Date.now(),
+                timeCreated: moment().format('LLL'),
                 password: req.body.gamePassword,
                 createdBy: req.body.createdBy,
                 amount: req.body.gameAmount,
