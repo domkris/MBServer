@@ -18,14 +18,14 @@ router.get('/', async (req, res) => {
 })
 
 // GET A SPECIFIC GAME
-router.get('/:gameName', async (req, res) => {
+router.get('/:createdBy', async (req, res) => {
     try
     {
-        const foundGame = await Game.find({ name :req.params.gameName });
+        const foundGame = await Game.find({ createdBy :req.params.createdBy });
         if(foundGame.length !== 0){
             res.json({success : true, message:"Game exists"});
         }else {
-            res.json({success: false, message: "Game does not exist!"});
+            res.json({success: false, message: "Game does not exist!", games: foundGame});
         }
     }
     catch(error)
