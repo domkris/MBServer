@@ -23,9 +23,9 @@ router.get('/:createdBy', async (req, res) => {
     {
         const foundGame = await Game.find({ createdBy :req.params.createdBy });
         if(foundGame.length !== 0){
-            res.json({success : true, message:"Game exists", games: foundGame});
+            res.json({success : true, games: foundGame});
         }else {
-            res.json({success: false, message: "Game does not exist!"});
+            res.json({success: false, message: "No games found for this user!"});
         }
     }
     catch(error)
