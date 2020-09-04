@@ -70,6 +70,16 @@ io.on('connection', socket => {
 
     });
 
+       //listen for chat and console to the server
+    socket.on("chat", (message) => {
+        // find the current user
+        const user = getCurrentUser(socket.id);
+
+        // emit to the other users in the same game
+        io.to(user.game).emit("chat", formatMessage("message", message.username, message.text));
+
+    });
+
     //listen for transaction and console to the server
     socket.on("transaction", (message) => {
         console.log(message);
