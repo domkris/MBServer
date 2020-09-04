@@ -76,7 +76,7 @@ io.on('connection', socket => {
         const user = getCurrentUser(socket.id);
 
         // emit to the other users in the same game
-        io.to(user.game).emit("chat", formatMessage("message", message.username, message.text));
+        io.to(user.game).emit("chat", formatMessage("chat", message.username, message.text));
 
     });
 
