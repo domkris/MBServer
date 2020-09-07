@@ -67,8 +67,20 @@ router.post('/', async (req, res) => {
 router.delete('/:userId', async (req, res) => {
     try
     {
-        const aUser = await User.remove( {_id : req.params.userId });
-        res.json(aUser);
+        const aUser = await User.find({ username : req.body.username});
+         if(!aUser[0]) {
+            res.json({ message: "Wrong username or password !", success: false});
+         }
+         else {
+             if(await bcrypt.compare(req.body.admin, "true7")){
+
+                const aUser = await User.remove( {_id : req.params.userId });
+                 res.json({success: true, userData: aUser});
+
+             }else {
+                 res.json({message:"Wrong username or password !", success: false});
+             }
+         }     
     }
     catch(error)
     {

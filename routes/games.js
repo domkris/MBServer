@@ -152,6 +152,26 @@ router.delete('/:gameId', async (req, res) => {
     }
 })
 
+// DELETE USER'S GAMES
+router.post('/delete', async (req, res) => {
+    try
+    {   
+        if(req.body.admin === true){
+            Game.deleteMany({ createdBy: req.body.username }, function (err, result) {
+                if (err) {
+                    res.json({err});
+                    } else {
+                    res.json({success: true, result});
+                    }
+            });
+        }              
+    }
+    catch(error)
+    {
+        res.json({ message: error });
+    }
+})
+
 // UPDATE A GAME
 router.patch('/:gameId', async (req, res) => {
     try
