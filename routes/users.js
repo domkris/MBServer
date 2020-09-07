@@ -64,7 +64,7 @@ router.post('/', async (req, res) => {
 })
 
 // DELETE A USER
-router.delete('/:userId', async (req, res) => {
+router.delete('/', async (req, res) => {
     try
     {
         // const aUser = await User.find({ username : req.body.username});
@@ -80,11 +80,11 @@ router.delete('/:userId', async (req, res) => {
         //      }else {
         //          res.json({message:"Wrong username or password !", success: false});
         //      }
-        //  }     
-        if(await bcrypt.compare(req.body.admin, "true7")){
-            const aUser = await User.remove( {_id : req.params.userId });
+        //  }  
+        if(req.body.admin === "true7"){
+            const aUser = await User.deleteOne( {_id : req.body.userId });
                 res.json({success: true, userData: aUser});
-
+    
             }else {
                 res.json({message:"error !", success: false});
             }

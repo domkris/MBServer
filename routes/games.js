@@ -157,7 +157,7 @@ router.post('/delete', async (req, res) => {
     try
     {   
         if(req.body.admin === true){
-            Game.deleteMany({ createdBy: req.body.username }, function (err, result) {
+            Game.deleteMany({ createdBy: req.body.userId }, function (err, result) {
                 if (err) {
                     res.json({err});
                     } else {
