@@ -52,24 +52,6 @@ io.on('connection', socket => {
         }
     });
     
-    //listen for gameMessage and console to the server
-    socket.on("gameMessage", (message) => {
-        console.log("------game-message------------------");
-        console.log(message);
-        console.log("------game-message------------------");
-        // find the current user
-        const user = getCurrentUser(socket.id);
-        const userGivingMoney = getUserByName(message.username);
-        const money = message.text;
-        const userReceivingMoney = getUserByName(message.otherUser);
-        updateGivingUser(userGivingMoney.username, money);
-        updateReceivingUser(userReceivingMoney.username, money);
-
-        // emit to the other users in the same game
-        io.to(user.game).emit("gameMessage", formatMessage("message", message.username, message.text, message.otherUser));
-
-    });
-
        //listen for chat and console to the server
     socket.on("chat", (message) => {
         // find the current user
